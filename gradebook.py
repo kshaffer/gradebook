@@ -21,3 +21,20 @@ import csv
 import sys
 import os
 
+
+class Student():
+
+	def __init__(self, filename):
+		self.data = []
+
+		self.filename = filename
+		self.name = filename.split('.')[0]
+
+	def assessments(self):
+		f = open(self.filename, 'rb')
+		r = csv.reader(r, delimiter=',')
+		assessmentList = []
+		assessmentList.extend(r)		
+		return assessmentList
+		
+		
