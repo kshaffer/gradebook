@@ -32,9 +32,14 @@ class Student():
 
 	def assessments(self):
 		f = open(self.filename, 'rb')
-		r = csv.reader(r, delimiter=',')
+		r = csv.reader(f, delimiter=',')
 		assessmentList = []
 		assessmentList.extend(r)		
 		return assessmentList
 		
+	def criteria(self):
+		criteriaList = []
+		for assessment in self.assessments():
+			criteriaList.append(assessment[0])
+		return criteriaList
 		
