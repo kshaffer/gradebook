@@ -34,7 +34,8 @@ class Student():
 		f = open(self.filename, 'rb')
 		r = csv.reader(f, delimiter=',')
 		assessmentList = []
-		assessmentList.extend(r)		
+		assessmentList.extend(r)
+		assessmentList.pop(0)
 		return assessmentList
 		
 	def criteria(self):
@@ -42,4 +43,12 @@ class Student():
 		for assessment in self.assessments():
 			criteriaList.append(assessment[0])
 		return criteriaList
+
+	def categories(self):
+		categoryList = []
+		for assessment in self.assessments():
+			categoryList.append(assessment[1])
+		return sorted(set(categoryList))
+		
+#	def categoryTable(self, category):
 		
