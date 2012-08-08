@@ -155,8 +155,9 @@ class Course(object):
 	def roster(self):
 		roster = []
 		for filename in os.listdir('./'):
-			if filename.split('.')[1] == 'csv':
-				roster.append(filename)
+			if not os.path.isdir(filename):
+				if filename.split('.')[1] == 'csv':
+					roster.append(filename)
 		i = 0
 		for file in roster:
 			if file == 'studentTemplate.csv':
@@ -235,3 +236,12 @@ def validate(valueShouldBe, valueIs):
 	validate(1.234, getMedian([1.234, 3.678, -2.467]))
 	validate(1.345, getMedian([1.234, 3.678, 1.456, -2.467]))
 			
+def mmd(name):
+	mdFile = name + '-report.md'
+	texFile = name + '-report.tex'
+	pdfFile = name + '-report.pdf'
+
+	os.system('multimarkdown -t latex ' + mdFile + ' > ' + texFile)
+	os.system('latexmk -f ' + texFile)
+	os.system('pdflatex ' + texFile)
+	os.system('latexmk -c ' + texFile)
