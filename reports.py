@@ -2,7 +2,7 @@
 from gradebook import *
 
 studentNames = []
-c = Course('Music I')
+c = Course(course)
 for student in c.roster():
 	s = Student(student)
 	studentNames.append(s.name)

@@ -23,6 +23,7 @@ import os
 import numpy
 
 instructor = 'Kris P. Shaffer'
+course = 'Music I'
 
 
 class Student(object):
