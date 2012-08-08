@@ -20,6 +20,7 @@
 import csv
 import sys
 import os
+import numpy
 
 instructor = 'Kris P. Shaffer'
 
@@ -85,6 +86,22 @@ class Student(object):
 				if assess[2] == 'A':
 					attempts += 1
 		return int(100 * float(attempts) / float(objectives))
+	
+	def medianScore(self, category):
+		scores = []
+		for assess in self.assessments():
+			if assess[1] == category:
+				if assess[3] == '4':
+					scores.append(assess[4])
+					scores.append(assess[6])
+		newScores = []
+		for value in scores:
+			if value != '':
+				newScores.append(int(value))
+		if newScores != []:
+			return float(getMedian(newScores))
+		else:
+			return 'n/a'
 		
 	def report(self, course):
 		report = self.latexHeader + '\n\n'
@@ -102,11 +119,11 @@ class Student(object):
 		print('Report generated for ' + self.name)
 	
 	def summaryTable(self, course):
-		table = '| Category | Objectives met | Objectives attempted |\n'
-		table += '| --: | :-: | :-: |\n'
+		table = '| Category | Objectives met | Objectives attempted | Median score |\n'
+		table += '| --: | :-: | :-: | :-: |\n'
 		for category in course.categories():
-			table += ('| ' + category + ' | ' + str(self.percentPassed(category)) + ' | ' + str(self.percentAttempted(category)) + ' |\n')
-		table += '[Summary of course objectives met by category.]\n\n'
+			table += ('| ' + category + ' | ' + str(self.percentPassed(category)) + ' | ' + str(self.percentAttempted(category)) + ' | ' + str(self.medianScore(category)) + ' |\n')
+		table += '[Summary of course objectives met by category. Median scores calculated for attempted 4-point-scale objectives only.]\n\n'
 		return table
 		
 		
@@ -123,7 +140,7 @@ class Course(object):
 		for stud in self.roster():
 			assessList = Student(stud).assessments()
 			for assess in assessList:
-				assessments.append(assess)
+				assessments.append(assess[0])
 		return sorted(set(assessments))
 
 	def categories(self):
@@ -148,13 +165,13 @@ class Course(object):
 		return sorted(set(roster))
 		
 	def classReportTable(self, category):
-		table = '| Student | Objectives met | Objectives attempted |\n'
-		table += '| --: | :-: | :-: |\n'
+		table = '| Student | Objectives met | Objectives attempted | Median score |\n'
+		table += '| --: | :-: | :-: | :-: |\n'
 		for student in self.roster():
 			stud = Student(student)
-			report = '| ' + stud.name + ' | ' + str(stud.percentPassed(category)) + ' | ' + str(stud.percentAttempted(category)) + ' |\n'
+			report = '| ' + stud.name + ' | ' + str(stud.percentPassed(category)) + ' | ' + str(stud.percentAttempted(category)) + ' | ' + str(stud.medianScore(category)) + ' |\n'
 			table += report
-		table += '[Assessments for ' + category + ']\n'
+		table += '[Assessments for ' + category + '. Median scores calculated for attempted 4-point-scale objectives only.]\n'
 		return table
 		
 	def classReport(self):
@@ -169,6 +186,52 @@ class Course(object):
 		f = open(reportFile, 'wb')
 		f.write(self.classReport())
 		print('Report generated for ' + self.name)
+
+	def assessmentReportTable(self, objective):
+		table = '| Student | Status | Scale | Assessment 1 | Date 1 | Assessment 2 | Date 2 |\n'
+		table += '| --: | :-: | :-: | :-: | :-: | :-: | :-: |\n'
+		for student in self.roster():
+			stud = Student(student)
+			for assess in stud.assessments():
+				if assess[0] == objective:
+					table += ("| " + stud.name + " | " + assess[2] + " | " + assess[3] + " | " + assess[4] + " | " + assess[5] + " | " + assess[6] + " | " + assess[7] + " |\n")
+		table += '[Assessments for ' + objective + '.]\n'
+		return table
+		
+	def assessmentReport(self, category):
+		report = self.latexHeader + '\n\n'
+		objectives = []
+		for assessment in Student(self.roster()[0]).assessments():
+			if assessment[1] == category:
+				objectives.append(assessment[0])
+		for objective in objectives:
+			report += self.assessmentReportTable(objective)
+			report += '\n\n'
+		return report
+		
+	def writeAssessmentReport(self, category):
+		reportFile = 'assessmentReport.md'
+		f = open(reportFile, 'wb')
+		f.write(self.assessmentReport(category))
+		print('Report generated for ' + self.name)
+
 	
 			
+def getMedian(numericValues):
+	theValues = sorted(numericValues)
+	if len(theValues) % 2 == 1:
+		return theValues[(len(theValues)+1)/2-1]
+	else:
+		lower = theValues[len(theValues)/2-1]
+		upper = theValues[len(theValues)/2]
+	return (float(lower + upper)) / 2
+	
+def validate(valueShouldBe, valueIs):
+	print 'Value Should Be: %.6f, Value Is: %.6f, Correct: %s' % (valueShouldBe, valueIs, valueShouldBe==valueIs)  
+	validate(2.5, getMedian([0,1,2,3,4,5]))
+	validate(2, getMedian([0,1,2,3,4]))
+	validate(2, getMedian([3,1,2]))
+	validate(3, getMedian([3,2,3]))
+	validate(1.234, getMedian([1.234, 3.678, -2.467]))
+	validate(1.345, getMedian([1.234, 3.678, 1.456, -2.467]))
 			
