@@ -123,7 +123,7 @@ class Student(object):
 		table = '| Category | Objectives met | Objectives attempted | Median score |\n'
 		table += '| --: | :-: | :-: | :-: |\n'
 		for category in course.categories():
-			table += ('| ' + category + ' | ' + str(self.percentPassed(category)) + ' | ' + str(self.percentAttempted(category)) + ' | ' + str(self.medianScore(category)) + ' |\n')
+			table += ('| ' + category + ' | ' + str(self.percentPassed(category)) + '% | ' + str(self.percentAttempted(category)) + '% | ' + str(self.medianScore(category)) + ' |\n')
 		table += '[Summary of course objectives met by category. Median scores calculated for attempted 4-point-scale objectives only.]\n\n'
 		return table
 		
@@ -171,7 +171,7 @@ class Course(object):
 		table += '| --: | :-: | :-: | :-: |\n'
 		for student in self.roster():
 			stud = Student(student)
-			report = '| ' + stud.name + ' | ' + str(stud.percentPassed(category)) + ' | ' + str(stud.percentAttempted(category)) + ' | ' + str(stud.medianScore(category)) + ' |\n'
+			report = '| ' + stud.name + ' | ' + str(stud.percentPassed(category)) + '% | ' + str(stud.percentAttempted(category)) + '% | ' + str(stud.medianScore(category)) + ' |\n'
 			table += report
 		table += '[Assessments for ' + category + '. Median scores calculated for attempted 4-point-scale objectives only.]\n'
 		return table
