@@ -24,7 +24,7 @@ import os
 instructor = 'Kris P. Shaffer'
 
 
-class Student():
+class Student(object):
 
 	def __init__(self, filename):
 		self.data = []
@@ -64,8 +64,32 @@ class Student():
 		table += '[Assessments for ' + category + ']\n'
 		return table
 		
+	def percentPassed(self, category):
+		objectives = 0
+		passed = 0
+		for assess in self.assessments():
+			if assess[1] == category:
+				objectives += 1
+				if assess[2] == 'P':
+					passed += 1
+		return int(100 * float(passed) / float(objectives))
+		
+	def percentAttempted(self, category):
+		attempts = 0
+		objectives = 0
+		for assess in self.assessments():
+			if assess[1] == category:
+				objectives += 1
+				if assess[2] == 'P':
+					attempts += 1
+				if assess[2] == 'A':
+					attempts += 1
+		return int(100 * float(attempts) / float(objectives))
+		
 	def report(self, course):
-		report = self.latexHeader + '\n'
+		report = self.latexHeader + '\n\n'
+		report += self.summaryTable(course)
+		report += '<!--\pagebreak-->\n\n'
 		for category in course.categories():
 			report += self.categoryTable(category)
 			report += '\n\n'
@@ -76,13 +100,22 @@ class Student():
 		f = open(reportFile, 'wb')
 		f.write(self.report(course))
 		print('Report generated for ' + self.name)
-		return 0
+	
+	def summaryTable(self, course):
+		table = '| Category | Objectives met | Objectives attempted |\n'
+		table += '| --: | :-: | :-: |\n'
+		for category in course.categories():
+			table += ('| ' + category + ' | ' + str(self.percentPassed(category)) + ' | ' + str(self.percentAttempted(category)) + ' |\n')
+		table += '[Summary of course objectives met by category.]\n\n'
+		return table
 		
 		
-class Course():
+class Course(object):
 
-	def __init__(self):
+	def __init__(self, name):
 		self.data = []
+		self.name = name
+		self.latexHeader = 'latex input: mmd-article-header\n' + 'Title: Class report for ' + self.name + '\n' + 'Author: ' + instructor + '\n' + 'Base Header Level: 2' + '\n' + 'latex mode: memoir' + '\n' + 'latex input: mmd-article-begin-doc' + '\n' + 'latex footer: mmd-memoir-footer\n\n'
 		
 	def assessments(self):
 		
@@ -112,5 +145,30 @@ class Course():
 			if file == 'studentTemplate.csv':
 				roster.pop(i)
 			i = i + 1
-		return roster
+		return sorted(set(roster))
+		
+	def classReportTable(self, category):
+		table = '| Student | Objectives met | Objectives attempted |\n'
+		table += '| --: | :-: | :-: |\n'
+		for student in self.roster():
+			stud = Student(student)
+			report = '| ' + stud.name + ' | ' + str(stud.percentPassed(category)) + ' | ' + str(stud.percentAttempted(category)) + ' |\n'
+			table += report
+		table += '[Assessments for ' + category + ']\n'
+		return table
+		
+	def classReport(self):
+		report = self.latexHeader + '\n\n'
+		for category in self.categories():
+			report += self.classReportTable(category)
+			report += '\n\n'
+		return report
+		
+	def writeReport(self):
+		reportFile = 'courseReport.md'
+		f = open(reportFile, 'wb')
+		f.write(self.classReport())
+		print('Report generated for ' + self.name)
+	
+			
 			
